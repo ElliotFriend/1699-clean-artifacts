@@ -250,3 +250,47 @@ $ sha256sum target/wasm32-unknown-unknown/release/hello_world.wasm
 $ sha256sum target/wasm32-unknown-unknown/release/hello_world.d
 0dc4e452ca908fb1df0eed04fb0dc7c55b0c9ab9c050af23cba03ab827627808  target/wasm32-unknown-unknown/release/hello_world.d
 ```
+
+## Restart vs code?
+
+### and rebuild
+
+blah blah `stellar contract blah`
+
+### and results
+
+```bash
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.wasm
+728a30ae1f7f7c0e68a2bb6ecbd08a7e5e237a4ccf8f32f6f73395e7ff881881  target/wasm32-unknown-unknown/release/hello_world.wasm
+
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.d
+0dc4e452ca908fb1df0eed04fb0dc7c55b0c9ab9c050af23cba03ab827627808  target/wasm32-unknown-unknown/release/hello_world.d
+```
+
+## Let's change those defaults again
+
+### this will probly behave as expected
+
+```rust
+fn retrieve_state(env: &Env) -> types::State {
+    env.storage().persistent().get(&symbol_short!("STATE")).unwrap_or_else(|| types::State {
+        count: 8u32,
+        last_incr: 7u32,
+        timestamp: 30u64,
+    })
+}
+```
+
+### but let's try it anyway
+
+`stellar contract build` is the buildiest way to go!
+
+```bash
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.wasm
+910648e53abcebfa78ca31fe63a88846e2de47fc50ec38522aa8ab17b4fd8550  target/wasm32-unknown-unknown/release/hello_world.wasm
+
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.d
+0dc4e452ca908fb1df0eed04fb0dc7c55b0c9ab9c050af23cba03ab827627808  target/wasm32-unknown-unknown/release/hello_world.d
+```
+
+i'm out of ideas!

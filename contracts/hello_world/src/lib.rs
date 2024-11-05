@@ -7,9 +7,9 @@ fn store_state(env: &Env, state: &types::State) {
 
 fn retrieve_state(env: &Env) -> types::State {
     env.storage().persistent().get(&symbol_short!("STATE")).unwrap_or_else(|| types::State {
-        count: 86u32,
-        last_incr: 75u32,
-        timestamp: 309u64,
+        count: 8u32,
+        last_incr: 7u32,
+        timestamp: 30u64,
     })
 }
 
