@@ -5,4 +5,5 @@ use soroban_sdk::contracttype;
 pub struct State {
     pub count: u32,
     pub last_incr: u32,
+    pub timestamp: u64,
 }

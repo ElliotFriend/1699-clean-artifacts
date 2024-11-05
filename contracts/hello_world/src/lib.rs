@@ -6,7 +6,11 @@ fn store_state(env: &Env, state: &types::State) {
 }
 
 fn retrieve_state(env: &Env) -> types::State {
-    env.storage().persistent().get(&symbol_short!("STATE")).unwrap_or_default()
+    env.storage().persistent().get(&symbol_short!("STATE")).unwrap_or_else(|| types::State {
+        count: 86u32,
+        last_incr: 75u32,
+        timestamp: 309u64,
+    })
 }
 
 #[contract]
@@ -27,6 +31,7 @@ impl HelloContract {
 
         state.count += incr;
         state.last_incr = incr;
+        state.timestamp = env.ledger().timestamp();
 
         store_state(&env, &state);
 

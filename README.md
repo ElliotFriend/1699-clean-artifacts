@@ -175,3 +175,78 @@ ec7ef8c9448274c0d4e0eb3986c4a3c8c6b382bd83172305fa1352867f7465c4  target/wasm32-
 
 Well, that compiled file is identical (i guess renaming it had no material
 affect).
+
+## What if we adjust the custom type
+
+### More timestampy
+
+Let's add a timestamp in the `types.rs` file (moving back to the `hello-world`
+contract, btw)
+
+```rust
+#[contracttype]
+#[derive(Clone, Default, Debug, Eq, PartialEq)]
+pub struct State {
+    pub count: u32,
+    pub last_incr: u32,
+    pub timestamp: u64,
+}
+```
+
+Make use of the timestamp in the `increment()` function:
+
+```rust
+pub fn increment(env: Env, incr: u32) -> u32 {
+    let mut state = Self::get_state(env.clone());
+
+    state.count += incr;
+    state.last_incr = incr;
+    state.timestamp = env.ledger().timestamp();
+
+    store_state(&env, &state);
+
+    state.count
+}
+```
+
+### More results-y
+
+And rinse and repeat `stellar contract build`, and rinse and repeat hashing files:
+
+```bash
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.wasm
+6c34ac38322da79ad60c8689a2112c1b73c772cd47fd62e19a878e034d67735f  target/wasm32-unknown-unknown/release/hello_world.wasm
+
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.d
+0dc4e452ca908fb1df0eed04fb0dc7c55b0c9ab9c050af23cba03ab827627808  target/wasm32-unknown-unknown/release/hello_world.d
+```
+
+Yeah, that seems about right... I don't know what else to try??!
+
+## What if we change _how_ the non-impl functions work?
+
+### Subtle, easy-to-not-notice change, perhaps?
+
+Let's do a different default if the persistent entry doesn't yet exist?
+
+```rust
+fn retrieve_state(env: &Env) -> types::State {
+    env.storage().persistent().get(&symbol_short!("STATE")).unwrap_or_else(|| types::State {
+        count: 86u32,
+        last_incr: 75u32,
+        timestamp: 309u64,
+    })
+}
+```
+
+### Hopefully not-noticed compilation differences?
+
+This should work, right?
+
+```bash
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.wasm
+728a30ae1f7f7c0e68a2bb6ecbd08a7e5e237a4ccf8f32f6f73395e7ff881881  target/wasm32-unknown-unknown/release/hello_world.wasm
+
+$ sha256sum target/wasm32-unknown-unknown/release/hello_world.d
+0dc4e452ca908fb1df0eed04fb0dc7c55b0c9ab9c050af23cba03ab827627808  target/wasm32-unknown-unknown/release/hello_world.d
+```
